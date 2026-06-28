@@ -1,13 +1,9 @@
-/* ============================================================
- 
 (function () {
     'use strict';
 
-    /* ── Theme toggle ── */
     const themeToggle = document.getElementById('themeToggle');
     const html        = document.documentElement;
 
-    // Restore saved preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         html.setAttribute('data-theme', savedTheme);
@@ -20,7 +16,6 @@
         localStorage.setItem('theme', next);
     });
 
-    /* ── Navbar scroll shadow ── */
     const navbar = document.getElementById('navbar');
 
     function onScroll() {
@@ -32,9 +27,9 @@
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // run once on load
+    onScroll(); 
 
-    /* ── Mobile hamburger ── */
+
     const hamburger = document.getElementById('hamburger');
     const navLinks  = document.getElementById('navLinks');
 
@@ -44,7 +39,7 @@
         hamburger.setAttribute('aria-expanded', String(isOpen));
     });
 
-    // Close mobile nav when a link is clicked
+    
     navLinks.querySelectorAll('a').forEach(function (link) {
         link.addEventListener('click', function () {
             navLinks.classList.remove('open');
@@ -53,7 +48,7 @@
         });
     });
 
-    // Close mobile nav on outside click
+
     document.addEventListener('click', function (e) {
         if (!navbar.contains(e.target)) {
             navLinks.classList.remove('open');
@@ -62,7 +57,7 @@
         }
     });
 
-    /* ── Active nav link + sliding bar on scroll ── */
+   
     const sections   = document.querySelectorAll('section[id]');
     const navAnchors = document.querySelectorAll('.nav-links a');
     const navList    = document.getElementById('navLinks');
@@ -81,7 +76,7 @@
             const isActive = a.getAttribute('href') === '#' + id;
             a.classList.toggle('active', isActive);
             if (isActive) activeAnchor = a;
-            // clear old inline styles from previous implementation
+           
             a.style.color      = '';
             a.style.fontWeight = '';
         });
@@ -106,7 +101,6 @@
         observer.observe(section);
     });
 
-    // Move bar on click immediately (don't wait for scroll observer)
     navAnchors.forEach(function (a) {
         a.addEventListener('click', function () {
             navAnchors.forEach(function (x) { x.classList.remove('active'); });
@@ -115,18 +109,18 @@
         });
     });
 
-    // Position bar on initial load
+   
     window.addEventListener('load', function () {
         var first = navList && navList.querySelector('a.active');
         if (!first) {
-            // default to About (home) on fresh load
+          
             first = navList && navList.querySelector('a[href="#hero"]');
             if (first) first.classList.add('active');
         }
         if (first) moveBar(first);
     });
 
-    /* ── Fade-in on scroll (subtle entrance animation) ── */
+    
     const fadeEls = document.querySelectorAll(
         '.project-card, .research-card, .achievement, .cert, .skill-group, .edu-item, .contact-item'
     );
@@ -134,7 +128,7 @@
     const respectsMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (!respectsMotion && 'IntersectionObserver' in window) {
-        // Set initial state
+      
         fadeEls.forEach(function (el) {
             el.style.opacity = '0';
             el.style.transform = 'translateY(16px)';
