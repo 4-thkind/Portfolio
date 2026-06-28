@@ -1,2 +1,2 @@
-# UtkarshSingh
+# Utkarsh Singh
 PORTFOLIO WEBSITE
