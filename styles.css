@@ -431,12 +431,12 @@ body::after {
     width: 3px;
     height: var(--line, 90px);
     margin: 0 auto;
-    background: #ffffff;
-    box-shadow: 0 0 6px rgba(255, 255, 255, 0.55);
+    background: #c4c4c4;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
 }
 
 .swinger-body {
-    width: 54px;
+    width: 78px;
     display: block;
     margin: -2px auto 0;
     image-rendering: pixelated;
@@ -445,7 +445,7 @@ body::after {
 
 @media (max-width: 980px) {
     .swinger { right: 6px; }
-    .swinger-body { width: 34px; }
+    .swinger-body { width: 40px; }
     /* keep the chassis clear of him so he never sits on the readout */
     .hero-topbar { padding-right: 46px; }
 }
