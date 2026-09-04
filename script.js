@@ -145,7 +145,7 @@
 
     
     const fadeEls = document.querySelectorAll(
-        '.project-card, .research-card, .achievement, .cert, .skill-group, .edu-item, .contact-item'
+        '.project-card, .research-card, .achievement, .cert, .skill-group, .edu-item, .contact-item, .stat'
     );
 
     const respectsMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -181,5 +181,59 @@
     window.addEventListener('scroll', onProgress, { passive: true });
     window.addEventListener('resize', onProgress);
     onProgress();
+
+    // ---------- HUD CLOCK ----------
+    const clock = document.getElementById('hudClock');
+
+    function tickClock() {
+        const d = new Date();
+        const pad = function (n) { return String(n).padStart(2, '0'); };
+        clock.textContent = 'SYS ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+
+    if (clock) {
+        tickClock();
+        setInterval(tickClock, 1000);
+    }
+
+    // ---------- STAT COUNTERS ----------
+    const stats = document.querySelectorAll('.stat-value[data-count]');
+
+    function runCount(el) {
+        const target   = parseFloat(el.dataset.count);
+        const decimals = parseInt(el.dataset.decimals || '0', 10);
+        const suffix   = el.dataset.suffix || '';
+        const duration = 900;
+        const start    = performance.now();
+
+        function frame(now) {
+            const t = Math.min((now - start) / duration, 1);
+            // ease-out so it settles rather than stopping dead
+            const v = target * (1 - Math.pow(1 - t, 3));
+            el.textContent = v.toFixed(decimals) + (t === 1 ? suffix : '');
+            if (t < 1) requestAnimationFrame(frame);
+        }
+
+        requestAnimationFrame(frame);
+    }
+
+    if ('IntersectionObserver' in window && !respectsMotion) {
+        const statObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    runCount(entry.target);
+                    statObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        stats.forEach(function (el) { statObserver.observe(el); });
+    } else {
+        // reduced motion or no observer: show the final numbers immediately
+        stats.forEach(function (el) {
+            const d = parseInt(el.dataset.decimals || '0', 10);
+            el.textContent = parseFloat(el.dataset.count).toFixed(d) + (el.dataset.suffix || '');
+        });
+    }
 
 })();
