@@ -426,6 +426,9 @@ body::after {
     align-items: center;
     opacity: 0;
     transition: opacity 0.45s ease;
+    /* --shift carries the whole rig off-screen with the page */
+    transform: translateY(var(--shift, 0px));
+    will-change: transform;
 }
 
 .swinger.visible { opacity: 1; }

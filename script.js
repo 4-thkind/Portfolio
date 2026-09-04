@@ -183,18 +183,18 @@
     onProgress();
 
     // ---------- WEB SLINGER ----------
-    // He hangs from a fixed anchor under the navbar. The moment the page
-    // scrolls he is reeled up out of sight (as if the web retracts with
-    // the page); once scrolling stops he drops back down to his spot,
-    // the same way he first arrives.
+    // He rides the page: while it scrolls he is carried off-screen in the
+    // same direction the content moves (scroll down and he sweeps up out
+    // of frame, scroll up and he drops away below). When scrolling stops
+    // he crawls back down his web into place.
     const swinger = document.getElementById('swinger');
     const body    = document.getElementById('swingerBody');
 
     if (swinger && body && !respectsMotion) {
         const ENTER_DELAY = 1500;  // stay away this long on load, ms
         const SETTLE      = 450;   // scrolling counts as stopped after this, ms
-        const DROP_TIME   = 1200;  // time to lower back down, ms
-        const LIFT_TIME   = 380;   // time to whip back up, ms
+        const DROP_TIME   = 1200;  // time to crawl back into place, ms
+        const EXIT_TIME   = 420;   // time to be carried off-screen, ms
         const HANG        = 150;   // resting web length, px
 
         const OPEN   = 'assets/spidey-hang.svg';
@@ -203,24 +203,28 @@
         const RIGHT  = 'assets/spidey-right.svg';
         [CLOSED, LEFT, RIGHT].forEach(function (src) { new Image().src = src; });
 
-        let len   = 0;      // current web length
-        let from  = 0;
-        let to    = 0;
-        let t0    = 0;
-        let dur   = DROP_TIME;
-        let running = false;
-        let awake = false;
-        let down  = false;  // is he currently lowered into view?
-        let stopTimer = null;
+        // len  = web length; shift = how far the whole rig is pushed away
+        let len = 0, lenFrom = 0, lenTo = 0;
+        let shift = 0, shiftFrom = 0, shiftTo = 0;
+        let t0 = 0, dur = DROP_TIME, running = false;
+        let awake = false, down = false;
+        let stopTimer = null, lastY = window.scrollY;
 
         function ease(t) {
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
 
+        function paint() {
+            swinger.style.setProperty('--line', len.toFixed(1) + 'px');
+            swinger.style.setProperty('--shift', shift.toFixed(1) + 'px');
+        }
+
         function step(now) {
             const t = Math.min((now - t0) / dur, 1);
-            len = from + (to - from) * ease(t);
-            swinger.style.setProperty('--line', len.toFixed(1) + 'px');
+            const e = ease(t);
+            len   = lenFrom   + (lenTo   - lenFrom)   * e;
+            shift = shiftFrom + (shiftTo - shiftFrom) * e;
+            paint();
             if (t < 1) {
                 requestAnimationFrame(step);
             } else {
@@ -229,27 +233,50 @@
             }
         }
 
-        function travel(target, ms) {
-            from = len;
-            to   = target;
-            dur  = ms;
-            t0   = performance.now();
+        function travel(targetLen, targetShift, ms) {
+            lenFrom   = len;   lenTo   = targetLen;
+            shiftFrom = shift; shiftTo = targetShift;
+            dur = ms;
+            t0  = performance.now();
             if (!running) { running = true; requestAnimationFrame(step); }
         }
 
-        function lower() { down = true;  swinger.classList.add('visible'); travel(HANG, DROP_TIME); }
-        function lift()  { down = false; body.src = OPEN; travel(0, LIFT_TIME); }
+        // crawl back down the web to the resting spot
+        function comeBack() {
+            down = true;
+            swinger.classList.add('visible');
+            // if he left downward, bring him back from below; either way he
+            // ends at the same place on a full-length web
+            travel(HANG, 0, DROP_TIME);
+        }
+
+        // carried off-screen the way the page is moving
+        function leave(dir) {
+            down = false;
+            body.src = OPEN;
+            // dir -1 = page scrolled down, content moves up -> he sweeps up
+            // dir +1 = page scrolled up,   content moves down -> he drops away
+            const off = dir < 0
+                ? -(HANG + 260)                     // up and out past the anchor
+                : window.innerHeight + 120;         // down past the bottom edge
+            travel(dir < 0 ? 0 : HANG, off, EXIT_TIME);
+        }
 
         window.addEventListener('scroll', function () {
+            const y = window.scrollY;
+            const dir = y > lastY ? -1 : 1;   // -1 scrolling down, +1 scrolling up
+            lastY = y;
+
             if (!awake) return;
-            if (down) lift();                 // vanish upward as the page moves
+            if (down) leave(dir);
+
             clearTimeout(stopTimer);
-            stopTimer = setTimeout(lower, SETTLE);
+            stopTimer = setTimeout(comeBack, SETTLE);
         }, { passive: true });
 
         // ----- entrance -----
-        swinger.style.setProperty('--line', '0px');
-        setTimeout(function () { awake = true; lower(); }, ENTER_DELAY);
+        paint();
+        setTimeout(function () { awake = true; comeBack(); }, ENTER_DELAY);
 
         // ----- idle behaviour -----
         function glanceAround() {
