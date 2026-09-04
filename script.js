@@ -352,7 +352,8 @@
             const t = Math.min((now - start) / duration, 1);
             // ease-out so it settles rather than stopping dead
             const v = target * (1 - Math.pow(1 - t, 3));
-            el.textContent = v.toFixed(decimals) + (t === 1 ? suffix : '');
+            // keep the suffix visible the whole way up so it does not pop in
+            el.textContent = v.toFixed(decimals) + suffix;
             if (t < 1) requestAnimationFrame(frame);
         }
 
