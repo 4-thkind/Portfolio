@@ -183,19 +183,18 @@
     onProgress();
 
     // ---------- WEB SLINGER ----------
-    // The web always runs from a fixed anchor under the navbar down to
-    // him — only its length changes, so the strand is never detached.
-    // Scrolling down reels him up to the anchor and out of sight;
-    // scrolling up pays the web out until he drops below the fold.
-    // When scrolling stops he crawls back to his resting length.
+    // He behaves like he is pinned to the page, not to the viewport: as
+    // you scroll, the web pays out or reels in by exactly the distance
+    // scrolled, so he drifts with the content instead of reacting. Small
+    // scrolls barely move him. Only a large scroll carries him off the
+    // edge on his own. When scrolling stops he settles back to rest.
     const swinger = document.getElementById('swinger');
     const body    = document.getElementById('swingerBody');
 
     if (swinger && body && !respectsMotion) {
         const ENTER_DELAY = 500;   // stay away this long on load, ms
-        const SETTLE      = 450;   // scrolling counts as stopped after this, ms
-        const DROP_TIME   = 1200;  // time to crawl back into place, ms
-        const EXIT_TIME   = 420;   // time to leave the frame, ms
+        const SETTLE      = 420;   // scrolling counts as stopped after this, ms
+        const DROP_TIME   = 1100;  // time to settle back into place, ms
         const HANG        = 360;   // resting web length from the off-screen anchor, px
 
         const OPEN   = 'assets/spidey-hang.svg';
@@ -204,9 +203,14 @@
         const RIGHT  = 'assets/spidey-right.svg';
         [CLOSED, LEFT, RIGHT].forEach(function (src) { new Image().src = src; });
 
+        // how far the web may pay out before he is off the bottom edge
+        function maxLen() {
+            return window.innerHeight + 260;
+        }
+
         let len = 0, from = 0, to = 0;
         let t0 = 0, dur = DROP_TIME, running = false;
-        let awake = false, down = false;
+        let awake = false;
         let stopTimer = null, lastY = window.scrollY;
         let glancing = false;      // true while a look-around is playing
 
@@ -214,101 +218,96 @@
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
 
+        function paint() {
+            swinger.style.setProperty('--line', len.toFixed(1) + 'px');
+        }
+
+        // is he close enough to his resting spot to count as "in place"?
+        function atRest() {
+            return Math.abs(len - HANG) < 24;
+        }
+
         function step(now) {
             const t = Math.min((now - t0) / dur, 1);
             len = from + (to - from) * ease(t);
-            swinger.style.setProperty('--line', len.toFixed(1) + 'px');
+            paint();
             if (t < 1) {
                 requestAnimationFrame(step);
             } else {
                 running = false;
-                if (down) glanceAround(true);   // arriving: always looks left first
+                glanceAround(true);   // arriving: always looks left first
             }
         }
 
-        function travel(target, ms) {
+        function settleBack() {
             from = len;
-            to   = target;
-            dur  = ms;
+            to   = HANG;
+            dur  = DROP_TIME;
             t0   = performance.now();
             if (!running) { running = true; requestAnimationFrame(step); }
         }
 
-        // how much web is needed to carry him past the bottom edge
-        function belowFold() {
-            const anchor = swinger.getBoundingClientRect().top;
-            return Math.max(0, window.innerHeight - anchor) + 160;
-        }
-
-        function comeBack() {
-            down = true;
-            swinger.classList.add('visible');
-            travel(HANG, DROP_TIME);
-        }
-
-        function leave(dir) {
-            down = false;
-            glancing = false;
-            body.src = OPEN;
-            // scrolling down  -> reel all the way in, he vanishes upward
-            // scrolling up    -> pay out until he is past the bottom edge
-            travel(dir < 0 ? 0 : belowFold(), EXIT_TIME);
-        }
-
         window.addEventListener('scroll', function () {
-            const y = window.scrollY;
-            const dir = y > lastY ? -1 : 1;   // -1 down, +1 up
+            const y  = window.scrollY;
+            const dy = y - lastY;
             lastY = y;
 
             if (!awake) return;
-            if (down) leave(dir);
+
+            // cancel any settle in progress — the page is moving again
+            running  = false;
+            glancing = false;
+
+            // Drift with the page: scrolling down (dy > 0) means content
+            // moves up, so the web reels in by that much; scrolling up
+            // pays it back out. Clamped so he cannot overshoot the edges.
+            len = Math.max(0, Math.min(maxLen(), len - dy));
+            paint();
 
             clearTimeout(stopTimer);
-            stopTimer = setTimeout(comeBack, SETTLE);
+            stopTimer = setTimeout(settleBack, SETTLE);
         }, { passive: true });
 
         // ----- entrance -----
-        swinger.style.setProperty('--line', '0px');
-        setTimeout(function () { awake = true; comeBack(); }, ENTER_DELAY);
+        paint();
+        setTimeout(function () {
+            awake = true;
+            swinger.classList.add('visible');
+            settleBack();
+        }, ENTER_DELAY);
 
         // ----- idle behaviour -----
-        // A glance owns the sprite for its whole duration; blinking is
-        // suppressed while it runs so the two never fight over the frame.
-        // `arriving` glances always start to the left, so every time he drops
-        // in he reads as looking over the page before settling. Idle glances
-        // that fire while he is just hanging around pick a side at random.
         function glanceAround(arriving) {
-            if (glancing || !down) return;
+            if (glancing || !atRest()) return;
             glancing = true;
 
             const first = arriving ? LEFT : (Math.random() < 0.5 ? LEFT : RIGHT);
             const other = first === LEFT ? RIGHT : LEFT;
-            // on arrival he always sweeps both ways; idle glances sometimes do
             const twice = arriving || Math.random() < 0.6;
 
-            setTimeout(function () { if (down) body.src = first; }, 260);
-            setTimeout(function () { if (down) body.src = OPEN;  }, 1200);
+            setTimeout(function () { if (atRest()) body.src = first; }, 260);
+            setTimeout(function () { if (atRest()) body.src = OPEN;  }, 1200);
 
             if (twice) {
-                setTimeout(function () { if (down) body.src = other; }, 1500);
-                setTimeout(function () { if (down) body.src = OPEN;  }, 2450);
+                setTimeout(function () { if (atRest()) body.src = other; }, 1500);
+                setTimeout(function () { if (atRest()) body.src = OPEN;  }, 2450);
             }
             setTimeout(function () { glancing = false; }, twice ? 2600 : 1350);
         }
 
         function scheduleGlance() {
             setTimeout(function () {
-                if (!running && down) glanceAround(false);
+                if (!running && atRest()) glanceAround(false);
                 scheduleGlance();
             }, 11000 + Math.random() * 9000);
         }
 
         function blinkOnce(ms) {
             // never blink mid-glance, and never stack blinks
-            if (!down || glancing || body.src.indexOf('blink') !== -1) return;
+            if (!atRest() || glancing || body.src.indexOf('blink') !== -1) return;
             body.src = CLOSED;
             setTimeout(function () {
-                if (down && !glancing) body.src = OPEN;
+                if (atRest() && !glancing) body.src = OPEN;
             }, ms);
         }
 
