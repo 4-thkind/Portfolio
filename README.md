@@ -3,7 +3,7 @@
 
 ### Utkarsh Singh
 
-https://portfolio.utkarshsingh72007.workers.dev
+https://utkarshsingh.me
 
 AI researcher. Developer. Second-year undergrad who somehow got a paper into **ICML 2026**.
 
