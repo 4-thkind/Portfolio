@@ -1,7 +1,7 @@
 <div align="center">
 
 # UTKARSH SINGH
-**Researcher · Developer**
+**Researcher · Developer · Builder**
 
 <img src="assets/readmepic.jpg" width="800" alt="Utkarsh Singh" style="border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
 
@@ -12,17 +12,17 @@
 
 ---
 
-### AI researcher. Developer. Builder.
+
 
 Second-year undergrad building systems that actually work in the real world. 
 
-My focus sits at the intersection of **agentic AI, multimodal retrieval, and full-stack infrastructure**. I work on problems that look solved until you try to put them in production — designing agents that know their own limits, and writing software that scales.
+My focus sits at the intersection of **agentic AI, multimodal retrieval, and full-stack infrastructure**. I work on problems that look solved until you try to put them in production, designing agents that know their own limits, and writing software that scales.
 
 <br>
 
 <div align="center">
 
-**→ [Explore my research, projects, and work at utkarshsingh.me](https://utkarshsingh.me)**
+**→ [Explore my research, projects, and work at <br>utkarshsingh.me](https://utkarshsingh.me)**
 
 <br><br>
 
