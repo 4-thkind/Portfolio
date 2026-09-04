@@ -183,51 +183,106 @@
     onProgress();
 
     // ---------- WEB SLINGER ----------
-    // Chases the scroll with a critically-damped-ish spring so it lags
-    // behind, overshoots slightly, then settles — never snaps to place.
+    // Behaviour: when the page scrolls he holds still for a beat, then
+    // pays out web and glides to the new position, easing to a stop.
+    // Once settled he idles — glancing left/right and blinking on his
+    // own irregular schedule, independent of scrolling.
     const swinger = document.getElementById('swinger');
 
     if (swinger && !respectsMotion) {
-        const REST   = 90;    // resting line length, px
-        const STIFF  = 0.045; // how hard it is pulled toward the target
-        const DAMP   = 0.88;  // velocity retained per frame
-        const MAXLAG = 260;   // cap on how far it may trail, px
+        const REST      = 96;    // resting line length, px
+        const REACT_MIN = 500;   // hold this long before reacting, ms
+        const REACT_MAX = 1000;
+        const GLIDE     = 1100;  // travel time to the new spot, ms
 
-        let target = window.scrollY;
-        let pos    = target;   // the slinger's own lagging position
-        let vel    = 0;
-        let raf    = null;
+        let shownY   = window.scrollY;  // where he currently hangs
+        let fromY    = shownY;
+        let targetY  = shownY;
+        let moveStart = 0;
+        let moving   = false;
+        let holdUntil = 0;
+        let raf      = null;
 
-        function frame() {
-            const force = (target - pos) * STIFF;
-            vel = (vel + force) * DAMP;
-            pos += vel;
+        // easeInOutCubic: slow to leave, slow to arrive — reads as "sleek"
+        function ease(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
 
-            // how far behind it is, clamped so a fling cannot fling it off-screen
-            const drift = Math.max(-MAXLAG, Math.min(MAXLAG, pos - target));
-            // line pays out while trailing; tilt follows momentum
-            const line  = Math.max(46, Math.min(230, REST - drift * 0.7));
-            const sway  = Math.max(-22, Math.min(22, -vel * 0.9));
+        function paint(drop, stretch) {
+            swinger.style.setProperty('--drop', drop.toFixed(1) + 'px');
+            swinger.style.setProperty('--line', (REST + stretch).toFixed(1) + 'px');
+        }
 
-            swinger.style.setProperty('--line', line.toFixed(1) + 'px');
-            swinger.style.setProperty('--sway', sway.toFixed(2) + 'deg');
-            swinger.style.setProperty('--drop', (-drift * 0.18).toFixed(1) + 'px');
+        function loop(now) {
+            const pageY = window.scrollY;
 
-            // keep animating until it has essentially caught up
-            if (Math.abs(vel) > 0.05 || Math.abs(target - pos) > 0.5) {
-                raf = requestAnimationFrame(frame);
-            } else {
-                raf = null;
+            // a new scroll position arms a fresh reaction delay
+            if (pageY !== targetY) {
+                targetY   = pageY;
+                holdUntil = now + REACT_MIN + Math.random() * (REACT_MAX - REACT_MIN);
+                moving    = false;
             }
+
+            if (!moving && shownY !== targetY && now >= holdUntil) {
+                fromY     = shownY;
+                moveStart = now;
+                moving    = true;
+            }
+
+            if (moving) {
+                const t = Math.min((now - moveStart) / GLIDE, 1);
+                const e = ease(t);
+                shownY  = fromY + (targetY - fromY) * e;
+                if (t === 1) moving = false;
+            }
+
+            // he trails the page: the gap becomes visible line + offset
+            const lag = shownY - window.scrollY;
+            paint(-lag * 0.14, Math.max(-30, Math.min(150, -lag * 0.30)));
+
+            raf = requestAnimationFrame(loop);
         }
 
-        function kick() {
-            target = window.scrollY;
-            if (raf === null) raf = requestAnimationFrame(frame);
+        raf = requestAnimationFrame(loop);
+
+        // ----- idle: glance left/right, and blink, on separate clocks -----
+        const body = swinger.querySelector('.swinger-body');
+
+        function scheduleLook() {
+            // roughly every 15s, jittered so it never feels metronomic
+            setTimeout(function () {
+                const dir = Math.random() < 0.5 ? 'look-left' : 'look-right';
+                body.classList.add(dir);
+                setTimeout(function () {
+                    body.classList.remove(dir);
+                    // sometimes immediately glance the other way
+                    if (Math.random() < 0.45) {
+                        const other = dir === 'look-left' ? 'look-right' : 'look-left';
+                        body.classList.add(other);
+                        setTimeout(function () { body.classList.remove(other); }, 900);
+                    }
+                }, 1000);
+                scheduleLook();
+            }, 11000 + Math.random() * 9000);
         }
 
-        window.addEventListener('scroll', kick, { passive: true });
-        kick();
+        function scheduleBlink() {
+            setTimeout(function () {
+                swinger.classList.add('blink');
+                setTimeout(function () { swinger.classList.remove('blink'); }, 150);
+                // occasional quick double-blink
+                if (Math.random() < 0.3) {
+                    setTimeout(function () {
+                        swinger.classList.add('blink');
+                        setTimeout(function () { swinger.classList.remove('blink'); }, 150);
+                    }, 400);
+                }
+                scheduleBlink();
+            }, 2500 + Math.random() * 5500);
+        }
+
+        scheduleLook();
+        scheduleBlink();
     }
 
     // ---------- HUD CLOCK ----------
