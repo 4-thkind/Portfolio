@@ -266,17 +266,22 @@
             }, 11000 + Math.random() * 9000);
         }
 
+        const OPEN   = 'assets/spidey-hang.svg';
+        const CLOSED = 'assets/spidey-blink.svg';
+
+        // preload so the first blink does not flash an empty frame
+        new Image().src = CLOSED;
+
+        function blinkOnce(ms) {
+            body.src = CLOSED;
+            setTimeout(function () { body.src = OPEN; }, ms);
+        }
+
         function scheduleBlink() {
             setTimeout(function () {
-                swinger.classList.add('blink');
-                setTimeout(function () { swinger.classList.remove('blink'); }, 150);
+                blinkOnce(130);
                 // occasional quick double-blink
-                if (Math.random() < 0.3) {
-                    setTimeout(function () {
-                        swinger.classList.add('blink');
-                        setTimeout(function () { swinger.classList.remove('blink'); }, 150);
-                    }, 400);
-                }
+                if (Math.random() < 0.3) setTimeout(function () { blinkOnce(120); }, 380);
                 scheduleBlink();
             }, 2500 + Math.random() * 5500);
         }
