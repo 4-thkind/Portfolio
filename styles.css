@@ -245,13 +245,23 @@ p {
 }
 
 .hamburger {
-    display: none;
+    display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     gap: 5px;
     background: none;
-    border: none;
+    border: 1px solid transparent;
+    border-radius: 8px;
     cursor: pointer;
-    padding: 4px;
+    padding: 8px;
+    flex-shrink: 0;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.hamburger:hover {
+    background: var(--bg-alt);
+    border-color: var(--border);
 }
 
 .hamburger span {
@@ -267,8 +277,58 @@ p {
 .hamburger.open span:nth-child(2) { opacity: 0; }
 .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+/* ---------- MENU PANEL (desktop dropdown) ---------- */
+.nav-menu {
+    position: absolute;
+    top: calc(var(--nav-height) - 8px);
+    right: 32px;
+    min-width: 200px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    padding: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    z-index: 110;
+}
+
+.nav-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+[data-theme="dark"] .nav-menu {
+    background: #161616;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.nav-theme-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 6px 4px 6px 10px;
+}
+
+.nav-theme-label {
+    font-size: 0.875rem;
+    font-weight: 450;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
 /* ---------- THEME TOGGLE ---------- */
 .theme-toggle {
+    transform: scale(0.68);
+    transform-origin: center;
+    /* 90px track scaled to ~61px; pull in the leftover box width */
+    width: 62px;
+    height: 28px;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;
@@ -1290,8 +1350,11 @@ p {
         padding: 10px 12px;
     }
 
-    .hamburger {
-        display: flex;
+    /* floating panel; JS offsets it below the open links drawer */
+    .nav-menu {
+        right: 20px;
+        left: 20px;
+        min-width: 0;
     }
 
     .research-card {
@@ -1354,5 +1417,36 @@ p {
         flex-direction: row;
         padding: 20px 24px;
         gap: 16px;
+    }
+}
+
+/* ---------- REVEAL ON SCROLL ---------- */
+.js-reveal .project-card,
+.js-reveal .research-card,
+.js-reveal .achievement,
+.js-reveal .cert,
+.js-reveal .skill-group,
+.js-reveal .edu-item,
+.js-reveal .contact-item {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.js-reveal .is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .js-reveal .project-card,
+    .js-reveal .research-card,
+    .js-reveal .achievement,
+    .js-reveal .cert,
+    .js-reveal .skill-group,
+    .js-reveal .edu-item,
+    .js-reveal .contact-item {
+        opacity: 1;
+        transform: none;
     }
 }

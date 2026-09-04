@@ -4,10 +4,7 @@
     const themeToggle = document.getElementById('themeToggle');
     const html        = document.documentElement;
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        html.setAttribute('data-theme', savedTheme);
-    }
+    // initial theme is set by the inline script in <head> so there is no flash
 
     themeToggle.addEventListener('click', function () {
         const isDark = html.getAttribute('data-theme') === 'dark';
@@ -32,29 +29,51 @@
 
     const hamburger = document.getElementById('hamburger');
     const navLinks  = document.getElementById('navLinks');
+    const navMenu   = document.getElementById('navMenu');
+
+    function closeMenu() {
+        navLinks.classList.remove('open');
+        navMenu.classList.remove('open');
+        hamburger.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+    }
 
     hamburger.addEventListener('click', function () {
-        const isOpen = navLinks.classList.toggle('open');
+        const isOpen = !navMenu.classList.contains('open');
+        navMenu.classList.toggle('open', isOpen);
+        // below 640px the nav links live in the same drawer
+        navLinks.classList.toggle('open', isOpen);
         hamburger.classList.toggle('open', isOpen);
         hamburger.setAttribute('aria-expanded', String(isOpen));
+        positionMenu();
     });
 
-    
+    // on mobile the links drawer is open above the panel, so push the panel below it
+    function positionMenu() {
+        if (!navMenu.classList.contains('open')) return;
+        const stacked = getComputedStyle(navLinks).position === 'absolute';
+        navMenu.style.top = stacked
+            ? (navLinks.offsetTop + navLinks.offsetHeight + 8) + 'px'
+            : '';
+    }
+
+    window.addEventListener('resize', positionMenu);
+
     navLinks.querySelectorAll('a').forEach(function (link) {
-        link.addEventListener('click', function () {
-            navLinks.classList.remove('open');
-            hamburger.classList.remove('open');
-            hamburger.setAttribute('aria-expanded', 'false');
-        });
+        link.addEventListener('click', closeMenu);
     });
 
+    // switching theme should not dismiss the menu
+    navMenu.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
 
     document.addEventListener('click', function (e) {
-        if (!navbar.contains(e.target)) {
-            navLinks.classList.remove('open');
-            hamburger.classList.remove('open');
-            hamburger.setAttribute('aria-expanded', 'false');
-        }
+        if (!navbar.contains(e.target)) closeMenu();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeMenu();
     });
 
    
@@ -70,10 +89,14 @@
         navList.style.setProperty('--bar-width', linkRect.width + 'px');
     }
 
+    // the About link points at #hero, so treat the #about section as the same target
+    const SECTION_ALIAS = { about: 'hero' };
+
     function setActive(id) {
+        const target = SECTION_ALIAS[id] || id;
         let activeAnchor = null;
         navAnchors.forEach(function (a) {
-            const isActive = a.getAttribute('href') === '#' + id;
+            const isActive = a.getAttribute('href') === '#' + target;
             a.classList.toggle('active', isActive);
             if (isActive) activeAnchor = a;
            
@@ -128,29 +151,35 @@
     const respectsMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (!respectsMotion && 'IntersectionObserver' in window) {
-      
-        fadeEls.forEach(function (el) {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(16px)';
-            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        });
+        document.documentElement.classList.add('js-reveal');
 
         const fadeObserver = new IntersectionObserver(
             function (entries) {
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
+                        entry.target.classList.add('is-visible');
                         fadeObserver.unobserve(entry.target);
                     }
                 });
             },
-            { threshold: 0.1 }
+            { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
         );
 
         fadeEls.forEach(function (el) {
             fadeObserver.observe(el);
         });
     }
+
+    // scroll progress bar
+    const progress = document.getElementById('scrollProgress');
+
+    function onProgress() {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.transform = 'scaleX(' + (max > 0 ? window.scrollY / max : 0) + ')';
+    }
+
+    window.addEventListener('scroll', onProgress, { passive: true });
+    window.addEventListener('resize', onProgress);
+    onProgress();
 
 })();
