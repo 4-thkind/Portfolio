@@ -183,18 +183,19 @@
     onProgress();
 
     // ---------- WEB SLINGER ----------
-    // The web is anchored at the top of the page and never moves; only
-    // its LENGTH changes, so he rides up and down the same strand.
-    // He does not track scrolling live: he waits for scrolling to stop,
-    // then descends (or rises) slowly to the new spot and looks around.
+    // He hangs from a fixed anchor under the navbar. The moment the page
+    // scrolls he is reeled up out of sight (as if the web retracts with
+    // the page); once scrolling stops he drops back down to his spot,
+    // the same way he first arrives.
     const swinger = document.getElementById('swinger');
     const body    = document.getElementById('swingerBody');
 
     if (swinger && body && !respectsMotion) {
-        const ENTER_DELAY = 1500;  // stay hidden this long on load, ms
-        const SETTLE      = 420;   // scrolling counts as stopped after this, ms
-        const TRAVEL      = 1400;  // time to pay out / reel in the web, ms
-        const REST        = 150;   // resting line length below the navbar, px
+        const ENTER_DELAY = 1500;  // stay away this long on load, ms
+        const SETTLE      = 450;   // scrolling counts as stopped after this, ms
+        const DROP_TIME   = 1200;  // time to lower back down, ms
+        const LIFT_TIME   = 380;   // time to whip back up, ms
+        const HANG        = 150;   // resting web length, px
 
         const OPEN   = 'assets/spidey-hang.svg';
         const CLOSED = 'assets/spidey-blink.svg';
@@ -202,101 +203,84 @@
         const RIGHT  = 'assets/spidey-right.svg';
         [CLOSED, LEFT, RIGHT].forEach(function (src) { new Image().src = src; });
 
-        let lineNow  = REST;   // current web length
-        let lineFrom = REST;
-        let lineTo   = REST;
-        let t0       = 0;
-        let animating = false;
-        let awake    = false;
+        let len   = 0;      // current web length
+        let from  = 0;
+        let to    = 0;
+        let t0    = 0;
+        let dur   = DROP_TIME;
+        let running = false;
+        let awake = false;
+        let down  = false;  // is he currently lowered into view?
         let stopTimer = null;
 
         function ease(t) {
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
 
-        function paint() {
-            swinger.style.setProperty('--line', lineNow.toFixed(1) + 'px');
-        }
-
         function step(now) {
-            const t = Math.min((now - t0) / TRAVEL, 1);
-            lineNow = lineFrom + (lineTo - lineFrom) * ease(t);
-            paint();
+            const t = Math.min((now - t0) / dur, 1);
+            len = from + (to - from) * ease(t);
+            swinger.style.setProperty('--line', len.toFixed(1) + 'px');
             if (t < 1) {
                 requestAnimationFrame(step);
             } else {
-                animating = false;
-                glanceAround();          // look about once he arrives
+                running = false;
+                if (down) glanceAround();   // look about once he arrives
             }
         }
 
-        function travelTo(len) {
-            lineFrom  = lineNow;
-            lineTo    = len;
-            t0        = performance.now();
-            animating = true;
-            requestAnimationFrame(step);
+        function travel(target, ms) {
+            from = len;
+            to   = target;
+            dur  = ms;
+            t0   = performance.now();
+            if (!running) { running = true; requestAnimationFrame(step); }
         }
 
-        // Where he should hang for the current scroll position: further
-        // down the page pays out more web, up reels it back in.
-        function wantedLength() {
-            const max = document.documentElement.scrollHeight - window.innerHeight;
-            const frac = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
-            return REST + frac * Math.max(0, window.innerHeight - REST - 220);
-        }
-
-        function onScrollStopped() {
-            if (!awake) return;
-            const want = wantedLength();
-            if (Math.abs(want - lineNow) > 6) travelTo(want);
-        }
+        function lower() { down = true;  swinger.classList.add('visible'); travel(HANG, DROP_TIME); }
+        function lift()  { down = false; body.src = OPEN; travel(0, LIFT_TIME); }
 
         window.addEventListener('scroll', function () {
-            // ignore scrolling while it happens; act once it pauses
+            if (!awake) return;
+            if (down) lift();                 // vanish upward as the page moves
             clearTimeout(stopTimer);
-            stopTimer = setTimeout(onScrollStopped, SETTLE);
+            stopTimer = setTimeout(lower, SETTLE);
         }, { passive: true });
 
-        // ----- entrance: absent, then drops in on his web -----
-        lineNow = 0;
-        paint();
-        setTimeout(function () {
-            awake = true;
-            swinger.classList.add('visible');
-            travelTo(wantedLength());
-        }, ENTER_DELAY);
+        // ----- entrance -----
+        swinger.style.setProperty('--line', '0px');
+        setTimeout(function () { awake = true; lower(); }, ENTER_DELAY);
 
         // ----- idle behaviour -----
         function glanceAround() {
             const first = Math.random() < 0.5 ? LEFT : RIGHT;
             const other = first === LEFT ? RIGHT : LEFT;
-            setTimeout(function () { body.src = first; }, 220);
-            setTimeout(function () { body.src = OPEN;  }, 1120);
+            setTimeout(function () { if (down) body.src = first; }, 260);
+            setTimeout(function () { if (down) body.src = OPEN;  }, 1200);
             if (Math.random() < 0.6) {
-                setTimeout(function () { body.src = other; }, 1400);
-                setTimeout(function () { body.src = OPEN;  }, 2300);
+                setTimeout(function () { if (down) body.src = other; }, 1500);
+                setTimeout(function () { if (down) body.src = OPEN;  }, 2450);
             }
         }
 
         function scheduleGlance() {
             setTimeout(function () {
-                if (!animating && awake) glanceAround();
+                if (!running && down) glanceAround();
                 scheduleGlance();
             }, 11000 + Math.random() * 9000);
         }
 
         function blinkOnce(ms) {
-            if (body.src.indexOf('blink') !== -1) return;
+            if (!down || body.src.indexOf('blink') !== -1) return;
             const was = body.getAttribute('src');
             body.src = CLOSED;
-            setTimeout(function () { body.src = was; }, ms);
+            setTimeout(function () { if (down) body.src = was; }, ms);
         }
 
         function scheduleBlink() {
             setTimeout(function () {
-                if (awake) blinkOnce(130);
-                if (Math.random() < 0.3) setTimeout(function () { if (awake) blinkOnce(120); }, 380);
+                blinkOnce(130);
+                if (Math.random() < 0.3) setTimeout(function () { blinkOnce(120); }, 380);
                 scheduleBlink();
             }, 2500 + Math.random() * 5500);
         }
