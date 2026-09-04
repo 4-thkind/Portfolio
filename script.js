@@ -222,7 +222,7 @@
                 requestAnimationFrame(step);
             } else {
                 running = false;
-                if (down) glanceAround();   // look about once he arrives
+                if (down) glanceAround(true);   // arriving: always looks left first
             }
         }
 
@@ -274,13 +274,17 @@
         // ----- idle behaviour -----
         // A glance owns the sprite for its whole duration; blinking is
         // suppressed while it runs so the two never fight over the frame.
-        function glanceAround() {
+        // `arriving` glances always start to the left, so every time he drops
+        // in he reads as looking over the page before settling. Idle glances
+        // that fire while he is just hanging around pick a side at random.
+        function glanceAround(arriving) {
             if (glancing || !down) return;
             glancing = true;
 
-            const first = Math.random() < 0.5 ? LEFT : RIGHT;
+            const first = arriving ? LEFT : (Math.random() < 0.5 ? LEFT : RIGHT);
             const other = first === LEFT ? RIGHT : LEFT;
-            const twice = Math.random() < 0.6;
+            // on arrival he always sweeps both ways; idle glances sometimes do
+            const twice = arriving || Math.random() < 0.6;
 
             setTimeout(function () { if (down) body.src = first; }, 260);
             setTimeout(function () { if (down) body.src = OPEN;  }, 1200);
@@ -294,7 +298,7 @@
 
         function scheduleGlance() {
             setTimeout(function () {
-                if (!running && down) glanceAround();
+                if (!running && down) glanceAround(false);
                 scheduleGlance();
             }, 11000 + Math.random() * 9000);
         }
