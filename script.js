@@ -183,110 +183,125 @@
     onProgress();
 
     // ---------- WEB SLINGER ----------
-    // Behaviour: when the page scrolls he holds still for a beat, then
-    // pays out web and glides to the new position, easing to a stop.
-    // Once settled he idles — glancing left/right and blinking on his
-    // own irregular schedule, independent of scrolling.
+    // The web is anchored at the top of the page and never moves; only
+    // its LENGTH changes, so he rides up and down the same strand.
+    // He does not track scrolling live: he waits for scrolling to stop,
+    // then descends (or rises) slowly to the new spot and looks around.
     const swinger = document.getElementById('swinger');
+    const body    = document.getElementById('swingerBody');
 
-    if (swinger && !respectsMotion) {
-        const REST      = 96;    // resting line length, px
-        const REACT_MIN = 500;   // hold this long before reacting, ms
-        const REACT_MAX = 1000;
-        const GLIDE     = 1100;  // travel time to the new spot, ms
+    if (swinger && body && !respectsMotion) {
+        const ENTER_DELAY = 1500;  // stay hidden this long on load, ms
+        const SETTLE      = 420;   // scrolling counts as stopped after this, ms
+        const TRAVEL      = 1400;  // time to pay out / reel in the web, ms
+        const REST        = 150;   // resting line length below the navbar, px
 
-        let shownY   = window.scrollY;  // where he currently hangs
-        let fromY    = shownY;
-        let targetY  = shownY;
-        let moveStart = 0;
-        let moving   = false;
-        let holdUntil = 0;
-        let raf      = null;
+        const OPEN   = 'assets/spidey-hang.svg';
+        const CLOSED = 'assets/spidey-blink.svg';
+        const LEFT   = 'assets/spidey-left.svg';
+        const RIGHT  = 'assets/spidey-right.svg';
+        [CLOSED, LEFT, RIGHT].forEach(function (src) { new Image().src = src; });
 
-        // easeInOutCubic: slow to leave, slow to arrive — reads as "sleek"
+        let lineNow  = REST;   // current web length
+        let lineFrom = REST;
+        let lineTo   = REST;
+        let t0       = 0;
+        let animating = false;
+        let awake    = false;
+        let stopTimer = null;
+
         function ease(t) {
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
 
-        function paint(drop, stretch) {
-            swinger.style.setProperty('--drop', drop.toFixed(1) + 'px');
-            swinger.style.setProperty('--line', (REST + stretch).toFixed(1) + 'px');
+        function paint() {
+            swinger.style.setProperty('--line', lineNow.toFixed(1) + 'px');
         }
 
-        function loop(now) {
-            const pageY = window.scrollY;
-
-            // a new scroll position arms a fresh reaction delay
-            if (pageY !== targetY) {
-                targetY   = pageY;
-                holdUntil = now + REACT_MIN + Math.random() * (REACT_MAX - REACT_MIN);
-                moving    = false;
+        function step(now) {
+            const t = Math.min((now - t0) / TRAVEL, 1);
+            lineNow = lineFrom + (lineTo - lineFrom) * ease(t);
+            paint();
+            if (t < 1) {
+                requestAnimationFrame(step);
+            } else {
+                animating = false;
+                glanceAround();          // look about once he arrives
             }
-
-            if (!moving && shownY !== targetY && now >= holdUntil) {
-                fromY     = shownY;
-                moveStart = now;
-                moving    = true;
-            }
-
-            if (moving) {
-                const t = Math.min((now - moveStart) / GLIDE, 1);
-                const e = ease(t);
-                shownY  = fromY + (targetY - fromY) * e;
-                if (t === 1) moving = false;
-            }
-
-            // he trails the page: the gap becomes visible line + offset
-            const lag = shownY - window.scrollY;
-            paint(-lag * 0.14, Math.max(-30, Math.min(150, -lag * 0.30)));
-
-            raf = requestAnimationFrame(loop);
         }
 
-        raf = requestAnimationFrame(loop);
+        function travelTo(len) {
+            lineFrom  = lineNow;
+            lineTo    = len;
+            t0        = performance.now();
+            animating = true;
+            requestAnimationFrame(step);
+        }
 
-        // ----- idle: glance left/right, and blink, on separate clocks -----
-        const body = swinger.querySelector('.swinger-body');
+        // Where he should hang for the current scroll position: further
+        // down the page pays out more web, up reels it back in.
+        function wantedLength() {
+            const max = document.documentElement.scrollHeight - window.innerHeight;
+            const frac = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+            return REST + frac * Math.max(0, window.innerHeight - REST - 220);
+        }
 
-        function scheduleLook() {
-            // roughly every 15s, jittered so it never feels metronomic
+        function onScrollStopped() {
+            if (!awake) return;
+            const want = wantedLength();
+            if (Math.abs(want - lineNow) > 6) travelTo(want);
+        }
+
+        window.addEventListener('scroll', function () {
+            // ignore scrolling while it happens; act once it pauses
+            clearTimeout(stopTimer);
+            stopTimer = setTimeout(onScrollStopped, SETTLE);
+        }, { passive: true });
+
+        // ----- entrance: absent, then drops in on his web -----
+        lineNow = 0;
+        paint();
+        setTimeout(function () {
+            awake = true;
+            swinger.classList.add('visible');
+            travelTo(wantedLength());
+        }, ENTER_DELAY);
+
+        // ----- idle behaviour -----
+        function glanceAround() {
+            const first = Math.random() < 0.5 ? LEFT : RIGHT;
+            const other = first === LEFT ? RIGHT : LEFT;
+            setTimeout(function () { body.src = first; }, 220);
+            setTimeout(function () { body.src = OPEN;  }, 1120);
+            if (Math.random() < 0.6) {
+                setTimeout(function () { body.src = other; }, 1400);
+                setTimeout(function () { body.src = OPEN;  }, 2300);
+            }
+        }
+
+        function scheduleGlance() {
             setTimeout(function () {
-                const dir = Math.random() < 0.5 ? 'look-left' : 'look-right';
-                body.classList.add(dir);
-                setTimeout(function () {
-                    body.classList.remove(dir);
-                    // sometimes immediately glance the other way
-                    if (Math.random() < 0.45) {
-                        const other = dir === 'look-left' ? 'look-right' : 'look-left';
-                        body.classList.add(other);
-                        setTimeout(function () { body.classList.remove(other); }, 900);
-                    }
-                }, 1000);
-                scheduleLook();
+                if (!animating && awake) glanceAround();
+                scheduleGlance();
             }, 11000 + Math.random() * 9000);
         }
 
-        const OPEN   = 'assets/spidey-hang.svg';
-        const CLOSED = 'assets/spidey-blink.svg';
-
-        // preload so the first blink does not flash an empty frame
-        new Image().src = CLOSED;
-
         function blinkOnce(ms) {
+            if (body.src.indexOf('blink') !== -1) return;
+            const was = body.getAttribute('src');
             body.src = CLOSED;
-            setTimeout(function () { body.src = OPEN; }, ms);
+            setTimeout(function () { body.src = was; }, ms);
         }
 
         function scheduleBlink() {
             setTimeout(function () {
-                blinkOnce(130);
-                // occasional quick double-blink
-                if (Math.random() < 0.3) setTimeout(function () { blinkOnce(120); }, 380);
+                if (awake) blinkOnce(130);
+                if (Math.random() < 0.3) setTimeout(function () { if (awake) blinkOnce(120); }, 380);
                 scheduleBlink();
             }, 2500 + Math.random() * 5500);
         }
 
-        scheduleLook();
+        scheduleGlance();
         scheduleBlink();
     }
 
