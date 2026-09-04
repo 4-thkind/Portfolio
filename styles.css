@@ -417,18 +417,18 @@ body::after {
    rides further down or gets reeled back up. */
 .swinger {
     position: fixed;
-    top: var(--nav-height);
+    /* anchored above the fold: a zero-length web parks him off-screen,
+       and the strand always runs from here down to him */
+    top: -150px;
     right: 34px;
-    z-index: 95;
+    z-index: 90;
     pointer-events: none;
     display: flex;
     flex-direction: column;
     align-items: center;
     opacity: 0;
     transition: opacity 0.45s ease;
-    /* --shift carries the whole rig off-screen with the page */
-    transform: translateY(var(--shift, 0px));
-    will-change: transform;
+    will-change: contents;
 }
 
 .swinger.visible { opacity: 1; }
