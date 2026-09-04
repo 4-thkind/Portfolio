@@ -192,7 +192,7 @@
     const body    = document.getElementById('swingerBody');
 
     if (swinger && body && !respectsMotion) {
-        const ENTER_DELAY = 1500;  // stay away this long on load, ms
+        const ENTER_DELAY = 500;   // stay away this long on load, ms
         const SETTLE      = 450;   // scrolling counts as stopped after this, ms
         const DROP_TIME   = 1200;  // time to crawl back into place, ms
         const EXIT_TIME   = 420;   // time to leave the frame, ms
