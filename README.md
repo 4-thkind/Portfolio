@@ -1,9 +1,7 @@
 <div align="center">
 
-```text
-   ██  UTKARSH SINGH  ██
-   Researcher · Developer
-```
+# UTKARSH SINGH
+**Researcher · Developer**
 
 <img src="assets/readmepic.jpg" width="800" alt="Utkarsh Singh" style="border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
 
