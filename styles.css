@@ -38,7 +38,7 @@ img { display: block; max-width: 100%; }
     --hud-map-2:     #0d2a5c;
     --hud-panel:     #1f7ac4;
     --hud-panel-2:   #2b8fd9;
-    --hud-screen:    #0d2350;
+    --hud-screen:    #22252b;
     --hud-line:      #3fa9f5;
     --hud-cyan:      #5fd3f3;
 
@@ -73,7 +73,7 @@ img { display: block; max-width: 100%; }
     --hud-map-2:     #cfe3f7;
     --hud-panel:     #4aa3e0;
     --hud-panel-2:   #78c0ee;
-    --hud-screen:    #ffffff;
+    --hud-screen:    #f4f7fb;
     --hud-line:      #2f7fc4;
     --hud-cyan:      #1f6da8;
 
@@ -411,6 +411,50 @@ body::after {
     z-index: 1;
 }
 
+/* ---------- WEB SLINGER ---------- */
+/* Hangs from the top of the viewport on a web line and chases the
+   scroll position with easing, so it lags then catches up. */
+.swinger {
+    position: fixed;
+    /* starts just under the navbar so the web line reads from its edge */
+    top: var(--nav-height);
+    right: 34px;
+    z-index: 95;
+    pointer-events: none;
+    /* JS drives --drop (line length) and --sway (pendulum angle) */
+    transform: translateY(var(--drop, 0px)) rotate(var(--sway, 0deg));
+    transform-origin: top center;
+    will-change: transform;
+}
+
+.swinger-line {
+    width: 3px;
+    height: var(--line, 90px);
+    margin: 0 auto;
+    background: #ffffff;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.55);
+}
+
+.swinger-body {
+    width: 54px;
+    display: block;
+    margin: -2px auto 0;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.45));
+}
+
+@media (max-width: 980px) {
+    .swinger { right: 6px; }
+    .swinger-body { width: 34px; }
+    /* keep the chassis clear of him so he never sits on the readout */
+    .hero-topbar { padding-right: 46px; }
+}
+
+/* it is decoration; hide it for anyone who asked for less motion */
+@media (prefers-reduced-motion: reduce) {
+    .swinger { display: none; }
+}
+
 /* ---------- SCROLL PROGRESS ---------- */
 .scroll-progress {
     position: fixed;
@@ -485,9 +529,11 @@ body::after {
     content: '';
     position: absolute;
     inset: 0;
-    background:
-        repeating-linear-gradient(0deg,  rgba(63, 169, 245, 0.16) 0 1px, transparent 1px 28px),
-        repeating-linear-gradient(90deg, rgba(63, 169, 245, 0.16) 0 1px, transparent 1px 28px);
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.03) 0 1px,
+        transparent 1px 4px
+    );
     pointer-events: none;
 }
 
@@ -627,8 +673,8 @@ body::after {
 .hero-photo { position: relative; flex-shrink: 0; margin-bottom: 22px; }
 
 .hero-photo img {
-    width: 232px;
-    height: 264px;
+    width: 330px;
+    height: 396px;
     object-fit: cover;
     border: 4px solid var(--ink);
     box-shadow: 0 0 0 4px var(--hud-panel), 0 8px 0 rgba(0, 0, 0, 0.35);
@@ -655,31 +701,55 @@ body::after {
 .hero-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-top: 12px;
+    gap: 14px;
+}
+
+.hero-console {
+    margin-top: 14px;
+    padding: 16px 14px;
+    background: var(--hud-panel);
+    border: 3px solid var(--ink);
+    box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.22),
+                inset 0 -4px 0 rgba(0, 0, 0, 0.28);
 }
 
 .stat {
-    background: var(--hud-screen);
-    border: 3px solid var(--ink);
-    padding: 12px 10px;
+    display: block;
     text-align: center;
+    padding: 16px 12px 14px;
+    background: var(--hud-green);
+    border: 3px solid var(--ink);
+    box-shadow: 0 6px 0 var(--hud-green-dk);
+    transition: transform 0.08s steps(2), box-shadow 0.08s steps(2), background 0.15s steps(2);
+    cursor: default;
+}
+
+.stat:nth-child(2) { background: var(--hud-orange); box-shadow: 0 6px 0 var(--hud-orange-dk); }
+.stat:nth-child(3) { background: var(--hud-cyan);   box-shadow: 0 6px 0 #2b7fa0; }
+.stat:nth-child(4) { background: var(--hud-red);    box-shadow: 0 6px 0 var(--hud-red-dark); }
+
+.stat:hover { transform: translateY(-2px); }
+
+.stat:active,
+.stat.pressed {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 currentColor;
 }
 
 .stat-value {
     display: block;
-    font-size: 0.85rem;
-    color: var(--hud-amber);
-    margin-bottom: 7px;
-    text-shadow: 2px 2px 0 var(--ink);
+    font-size: 1.15rem;
+    color: #08131f;
+    margin-bottom: 9px;
+    text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.35);
 }
 
 .stat-label {
     font-family: 'Press Start 2P', monospace;
-    font-size: 0.4rem;
+    font-size: 0.45rem;
     text-transform: uppercase;
-    color: var(--text-muted);
-    line-height: 1.6;
+    color: #0a1725;
+    line-height: 1.7;
 }
 
 /* ---------- SECTIONS ---------- */
@@ -1154,7 +1224,7 @@ body::after {
 @media (max-width: 980px) {
     .hero-inner { grid-template-columns: 1fr; gap: 34px; }
     .hero-photo { order: -1; align-self: center; }
-    .hero-photo img { width: 190px; height: 216px; }
+    .hero-photo img { width: 270px; height: 324px; }
     .about-grid { grid-template-columns: 1fr; gap: 36px; }
     .projects-grid,
     .skills-grid { grid-template-columns: 1fr; }
@@ -1200,7 +1270,8 @@ body::after {
     .hero-shell { padding: 9px; }
     .hero-screen { padding: 26px 18px; }
 
-    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat-value { font-size: 0.95rem; }
 
     .hero-name { font-size: 1.05rem; }
 

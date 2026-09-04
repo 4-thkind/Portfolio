@@ -182,6 +182,54 @@
     window.addEventListener('resize', onProgress);
     onProgress();
 
+    // ---------- WEB SLINGER ----------
+    // Chases the scroll with a critically-damped-ish spring so it lags
+    // behind, overshoots slightly, then settles — never snaps to place.
+    const swinger = document.getElementById('swinger');
+
+    if (swinger && !respectsMotion) {
+        const REST   = 90;    // resting line length, px
+        const STIFF  = 0.045; // how hard it is pulled toward the target
+        const DAMP   = 0.88;  // velocity retained per frame
+        const MAXLAG = 260;   // cap on how far it may trail, px
+
+        let target = window.scrollY;
+        let pos    = target;   // the slinger's own lagging position
+        let vel    = 0;
+        let raf    = null;
+
+        function frame() {
+            const force = (target - pos) * STIFF;
+            vel = (vel + force) * DAMP;
+            pos += vel;
+
+            // how far behind it is, clamped so a fling cannot fling it off-screen
+            const drift = Math.max(-MAXLAG, Math.min(MAXLAG, pos - target));
+            // line pays out while trailing; tilt follows momentum
+            const line  = Math.max(46, Math.min(230, REST - drift * 0.7));
+            const sway  = Math.max(-22, Math.min(22, -vel * 0.9));
+
+            swinger.style.setProperty('--line', line.toFixed(1) + 'px');
+            swinger.style.setProperty('--sway', sway.toFixed(2) + 'deg');
+            swinger.style.setProperty('--drop', (-drift * 0.18).toFixed(1) + 'px');
+
+            // keep animating until it has essentially caught up
+            if (Math.abs(vel) > 0.05 || Math.abs(target - pos) > 0.5) {
+                raf = requestAnimationFrame(frame);
+            } else {
+                raf = null;
+            }
+        }
+
+        function kick() {
+            target = window.scrollY;
+            if (raf === null) raf = requestAnimationFrame(frame);
+        }
+
+        window.addEventListener('scroll', kick, { passive: true });
+        kick();
+    }
+
     // ---------- HUD CLOCK ----------
     const clock = document.getElementById('hudClock');
 

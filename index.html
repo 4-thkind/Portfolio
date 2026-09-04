@@ -28,6 +28,12 @@
     <div class="map-bg" aria-hidden="true"></div>
     <div class="scroll-progress" id="scrollProgress"></div>
 
+    <!-- web-slinger that trails the scroll position -->
+    <div class="swinger" id="swinger" aria-hidden="true">
+        <div class="swinger-line"></div>
+        <img class="swinger-body" src="assets/spidey-hang.svg" alt="">
+    </div>
+
     <!-- ===== NAVBAR ===== -->
     <nav class="navbar" id="navbar">
         <div class="nav-inner">
@@ -95,7 +101,8 @@
                     </div>
                 </div>
 
-                <div class="hero-stats">
+                <div class="hero-console">
+                    <div class="hero-stats">
                     <div class="stat">
                         <span class="stat-value" data-count="1">0</span>
                         <span class="stat-label">ICML Paper</span>
@@ -111,6 +118,7 @@
                     <div class="stat">
                         <span class="stat-value" data-count="3000" data-suffix="+">0</span>
                         <span class="stat-label">Ranked Among</span>
+                    </div>
                     </div>
                 </div>
 
