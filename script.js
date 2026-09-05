@@ -195,6 +195,7 @@
         const ENTER_DELAY = 500;   // stay away this long on load, ms
         const SETTLE      = 420;   // scrolling counts as stopped after this, ms
         const DROP_TIME   = 1100;  // time to settle back into place, ms
+        const ANCHOR_OFF  = 150;   // how far the anchor sits above the viewport, px
         const HANG        = 360;   // resting web length from the off-screen anchor, px
 
         const OPEN   = 'assets/spidey-hang.svg';
@@ -203,9 +204,13 @@
         const RIGHT  = 'assets/spidey-right.svg';
         [CLOSED, LEFT, RIGHT].forEach(function (src) { new Image().src = src; });
 
-        // how far the web may pay out before he is off the bottom edge
+        // How far the web may pay out: enough to carry him fully past the
+        // bottom edge (so scrolling up genuinely removes him from view),
+        // but no further, so the glide back is never absurdly long.
         function maxLen() {
-            return window.innerHeight + 260;
+            const anchorTop = swinger.getBoundingClientRect().top;
+            const spriteH   = body.offsetHeight || 120;
+            return Math.max(HANG + 120, window.innerHeight - anchorTop + spriteH + 40);
         }
 
         let len = 0, from = 0, to = 0;
@@ -227,25 +232,103 @@
             return Math.abs(len - HANG) < 24;
         }
 
+        // A real spider does not glide down a thread at constant speed: it
+        // pays out a length, stops, pays out again. `crawl` maps linear
+        // time onto that stop-start rhythm, then overshoots slightly and
+        // rebounds so the thread reads as elastic.
+        function crawl(t) {
+            // Two beats: he lowers just enough to show his head, hangs
+            // there a moment (long enough for a blink), then drops the
+            // rest of the way in one smooth movement.
+            // The anchor sits above the viewport, so the first beat has to
+            // pay out enough web to bring his head into view before pausing.
+            const peek = Math.min(0.62, Math.max(0.15, (ANCHOR_OFF + 78) / HANG));
+            const PHASES = [
+                [0.00, 0.22, 0.00, peek],   // t range -> progress range
+                [0.22, 0.54, peek, peek],   // hold — the peek
+                [0.54, 1.00, peek, 1.00]    // smooth descent
+            ];
+            for (let i = 0; i < PHASES.length; i++) {
+                const [t0p, t1p, p0, p1] = PHASES[i];
+                if (t <= t1p || i === PHASES.length - 1) {
+                    if (p0 === p1) return p0;                 // holding still
+                    const local = (t - t0p) / (t1p - t0p);
+                    return p0 + (p1 - p0) * ease(Math.max(0, Math.min(1, local)));
+                }
+            }
+            return 1;
+        }
+
+        // Inertia: the thread does not stop dead. Once the travel is
+        // essentially done it overshoots and oscillates in place, decaying
+        // to nothing — like a weight settling on an elastic line.
+        function rebound(t) {
+            if (t >= 1) return 0;
+            // Silent while gliding. Once he arrives the thread gives once,
+            // gently — a single soft overshoot and return, not a buzz.
+            if (t < 0.72) return 0;
+            const u = (t - 0.72) / 0.28;              // 0..1 across the tail
+            return Math.sin(u * Math.PI) * Math.pow(1 - u, 0.55);
+        }
+
+        let bobT0 = 0;       // idle bob clock
+        let useCrawl = false; // stop-start shape (entrance only)
+        let bobbing = false; // idle bob loop is running
+
         function step(now) {
             const t = Math.min((now - t0) / dur, 1);
-            len = from + (to - from) * ease(t);
+            // the first descent keeps the stop-start crawl; every later
+            // move is smooth and finishes with an inertia wobble
+            const shape = useCrawl ? crawl(t) : ease(t);
+            const travelled = from + (to - from) * shape;
+            // Overshoot follows the direction of travel, so a weight moving
+            // up carries past its stop and falls back, exactly as one moving
+            // down carries below and rises. Physics does not pick a side.
+            const dir   = to >= from ? 1 : -1;
+            const swing = Math.max(6, Math.min(14, Math.abs(to - from) * 0.055));
+            len = travelled + rebound(t) * swing * dir;
             paint();
             if (t < 1) {
                 requestAnimationFrame(step);
             } else {
+                len = to;
+                target = to;
+                paint();
                 running = false;
+                bobT0 = now;
+                if (!bobbing) { bobbing = true; requestAnimationFrame(bob); }
                 glanceAround(true);   // arriving: always looks left first
             }
         }
 
-        function settleBack() {
+        // while he just hangs there, breathe the thread a couple of pixels
+        function bob(now) {
+            // stop the moment anything else takes over the thread
+            if (running || !bobbing || !atRest()) { bobbing = false; return; }
+            const e = (now - bobT0) / 1000;
+            len = HANG + Math.sin(e * 1.6) * 2.4 + Math.sin(e * 0.7) * 1.2;
+            paint();
+            requestAnimationFrame(bob);
+        }
+
+        function settleBack(crawling) {
+            useCrawl = !!crawling;
             from = len;
             to   = HANG;
-            dur  = DROP_TIME;
+            dur  = crawling
+                ? Math.max(1900, Math.min(2600, 1400 + Math.abs(to - from) * 1.6))
+                : Math.max(900, Math.min(1500, 620 + Math.abs(to - from) * 1.1));
             t0   = performance.now();
             if (!running) { running = true; requestAnimationFrame(step); }
         }
+
+        // While the page is moving he is simply carried with it — the web
+        // pays out or reels in by exactly the scroll delta. No easing runs
+        // during the scroll, which is what used to make it stutter. The one
+        // smooth glide + wobble happens only once scrolling stops.
+        let target = 0;
+        let travelled = 0;          // net scroll since the last rest
+        const LEAVE = 90;           // px of scroll before he clears the frame
 
         window.addEventListener('scroll', function () {
             const y  = window.scrollY;
@@ -254,18 +337,34 @@
 
             if (!awake) return;
 
-            // cancel any settle in progress — the page is moving again
+            // cancel any settle or idle bob — the page is moving again
             running  = false;
+            bobbing  = false;
             glancing = false;
 
-            // Drift with the page: scrolling down (dy > 0) means content
-            // moves up, so the web reels in by that much; scrolling up
-            // pays it back out. Clamped so he cannot overshoot the edges.
-            len = Math.max(0, Math.min(maxLen(), len - dy));
+            // He is pinned to the page, so the web tracks the scroll 1:1.
+            // Past a small threshold that carries him clear of the frame:
+            // scrolling down reels him up and out, scrolling up pays out
+            // until he is below the fold. Either way he leaves with the
+            // page rather than riding along with it.
+            travelled += dy;
+
+            if (travelled > LEAVE) {          // net scroll down
+                target = 0;                   // reel in, off the top
+            } else if (travelled < -LEAVE) {  // net scroll up
+                target = maxLen();            // pay out, below the bottom
+            } else {
+                target = Math.max(0, Math.min(maxLen(), target - dy));
+            }
+
+            len = target;
             paint();
 
             clearTimeout(stopTimer);
-            stopTimer = setTimeout(settleBack, SETTLE);
+            stopTimer = setTimeout(function () {
+                travelled = 0;
+                settleBack(false);   // one smooth glide, ending in a wobble
+            }, SETTLE);
         }, { passive: true });
 
         // ----- entrance -----
@@ -273,7 +372,15 @@
         setTimeout(function () {
             awake = true;
             swinger.classList.add('visible');
-            settleBack();
+            settleBack(true);        // two-beat entrance: peek, blink, descend
+
+            // blink while he is hanging at the peek, before the drop
+            const peekAt = t0 + dur * 0.34;   // mid-way through the peek hold
+            const wait   = Math.max(0, peekAt - performance.now());
+            setTimeout(function () {
+                body.src = CLOSED;
+                setTimeout(function () { body.src = OPEN; }, 190);
+            }, wait);
         }, ENTER_DELAY);
 
         // ----- idle behaviour -----
@@ -316,7 +423,7 @@
                 blinkOnce(130);
                 if (Math.random() < 0.3) setTimeout(function () { blinkOnce(120); }, 380);
                 scheduleBlink();
-            }, 2500 + Math.random() * 5500);
+            }, 2400 + Math.random() * 1900);   // ~3.35s average -> ~13 blinks / 45s
         }
 
         scheduleGlance();

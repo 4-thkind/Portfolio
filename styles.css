@@ -1149,11 +1149,29 @@ body::after {
     background: var(--hud-panel);
 }
 
-.contact-icon img { width: 22px; height: 22px; }
+/* inline pixel icons: they inherit the tile's colour, so no white plates */
+.contact-icon svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+    color: var(--ink);
+}
+
+/* one accent per channel, matching the HUD button palette. Fixed values,
+   not theme tokens, so the dark glyph always has a light plate to sit on. */
+.contact-icon--mail { background: #ffd166; }
+.contact-icon--li   { background: #5fd3f3; }
+.contact-icon--gh   { background: #f5a03c; }
+
+/* lift the plate on hover rather than recolouring it — GitHub is already
+   orange, so a colour swap would read as nothing happening there */
+.contact-item:hover .contact-icon {
+    box-shadow: 0 0 0 3px var(--hud-cyan);
+}
 
 .contact-label {
     font-family: 'Press Start 2P', monospace;
-    font-size: 0.45rem;
+    font-size: 0.62rem;
     text-transform: uppercase;
     color: var(--hud-green);
     margin-bottom: 7px;
@@ -1176,7 +1194,7 @@ body::after {
 .footer-inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 18px;
     flex-wrap: wrap;
 }
@@ -1186,24 +1204,6 @@ body::after {
     font-size: 0.5rem;
     text-transform: uppercase;
     color: var(--text-muted);
-}
-
-.footer-links { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.footer-links a {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.45rem;
-    text-transform: uppercase;
-    color: var(--hud-cyan);
-    border: 2px solid var(--border);
-    padding: 7px 9px;
-    transition: color 0.15s steps(2), background 0.15s steps(2);
-}
-
-.footer-links a:hover {
-    color: var(--ink);
-    background: var(--hud-cyan);
-    border-color: var(--ink);
 }
 
 /* ---------- REVEAL ON SCROLL ---------- */
