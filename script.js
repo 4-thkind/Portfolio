@@ -327,8 +327,6 @@
         // during the scroll, which is what used to make it stutter. The one
         // smooth glide + wobble happens only once scrolling stops.
         let target = 0;
-        let travelled = 0;          // net scroll since the last rest
-        const LEAVE = 90;           // px of scroll before he clears the frame
 
         window.addEventListener('scroll', function () {
             const y  = window.scrollY;
@@ -342,27 +340,16 @@
             bobbing  = false;
             glancing = false;
 
-            // He is pinned to the page, so the web tracks the scroll 1:1.
-            // Past a small threshold that carries him clear of the frame:
-            // scrolling down reels him up and out, scrolling up pays out
-            // until he is below the fold. Either way he leaves with the
-            // page rather than riding along with it.
-            travelled += dy;
-
-            if (travelled > LEAVE) {          // net scroll down
-                target = 0;                   // reel in, off the top
-            } else if (travelled < -LEAVE) {  // net scroll up
-                target = maxLen();            // pay out, below the bottom
-            } else {
-                target = Math.max(0, Math.min(maxLen(), target - dy));
-            }
+            // He is pinned to the page: the web tracks the scroll exactly,
+            // so a small scroll nudges him a small amount and a long one
+            // carries him off the edge on its own. Nothing snaps.
+            target = Math.max(0, Math.min(maxLen(), target - dy));
 
             len = target;
             paint();
 
             clearTimeout(stopTimer);
             stopTimer = setTimeout(function () {
-                travelled = 0;
                 settleBack(false);   // one smooth glide, ending in a wobble
             }, SETTLE);
         }, { passive: true });

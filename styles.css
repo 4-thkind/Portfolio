@@ -248,11 +248,15 @@ body::after {
 
 .nav-brand[data-tooltip] { position: relative; }
 
+/* The brand text box is much shorter than the navbar, so offsetting from
+   it drops the label onto the navbar's bottom border and the line cuts
+   through the text. Push it clear of the bar instead. */
 .nav-brand[data-tooltip]::after {
     content: attr(data-tooltip);
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(50% + (var(--nav-height) / 2) + 10px);
     left: 0;
+    z-index: 120;
     background: var(--hud-orange);
     color: var(--ink);
     font-family: 'Press Start 2P', monospace;
@@ -260,6 +264,9 @@ body::after {
     white-space: nowrap;
     padding: 7px 9px;
     border: 2px solid var(--ink);
+    /* the brand's drop shadow would otherwise print a second, offset copy
+       of the label on top of the orange plate */
+    text-shadow: none;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s steps(2);
