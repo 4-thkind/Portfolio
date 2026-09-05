@@ -196,13 +196,35 @@
         const SETTLE      = 420;   // scrolling counts as stopped after this, ms
         const DROP_TIME   = 1100;  // time to settle back into place, ms
         const ANCHOR_OFF  = 150;   // how far the anchor sits above the viewport, px
-        const HANG        = 360;   // resting web length from the off-screen anchor, px
+        const HANG_MIN    = 360;   // shortest resting web length, px
+        const HANG_FIRST  = 445;   // opening entrance hangs a little lower
+        // Deepest hang sits a little below the section-heading dashed rule.
+        const BOTTOM_GAP  = 130;
+        let   HANG        = HANG_MIN;   // current resting length, re-rolled per arrival
+        let   firstDrop   = true;       // the opening entrance uses the default height
+
+        // Pick a fresh height each time he settles: anywhere from his usual
+        // spot down to comfortably above the bottom of the screen. The very
+        // first arrival keeps the default height so the page always opens
+        // looking the same.
+        function rollHang() {
+            if (firstDrop) {
+                firstDrop = false;
+                HANG = HANG_FIRST;
+                return;
+            }
+            const anchorTop = swinger.getBoundingClientRect().top;
+            const spriteH   = body.offsetHeight || 120;
+            // longest web that still leaves BOTTOM_GAP below him
+            const deepest = window.innerHeight - anchorTop - spriteH - BOTTOM_GAP;
+            const hi = Math.max(HANG_MIN, deepest);
+            HANG = HANG_MIN + Math.random() * (hi - HANG_MIN);
+        }
 
         const OPEN   = 'assets/spidey-hang.svg';
         const CLOSED = 'assets/spidey-blink.svg';
         const LEFT   = 'assets/spidey-left.svg';
-        const RIGHT  = 'assets/spidey-right.svg';
-        [CLOSED, LEFT, RIGHT].forEach(function (src) { new Image().src = src; });
+        [CLOSED, LEFT].forEach(function (src) { new Image().src = src; });
 
         // How far the web may pay out: enough to carry him fully past the
         // bottom edge (so scrolling up genuinely removes him from view),
@@ -297,7 +319,7 @@
                 running = false;
                 bobT0 = now;
                 if (!bobbing) { bobbing = true; requestAnimationFrame(bob); }
-                glanceAround(true);   // arriving: always looks left first
+                glanceAround();   // look around once he arrives
             }
         }
 
@@ -313,6 +335,7 @@
 
         function settleBack(crawling) {
             useCrawl = !!crawling;
+            rollHang();          // fresh resting height for this arrival
             from = len;
             to   = HANG;
             dur  = crawling
@@ -371,27 +394,20 @@
         }, ENTER_DELAY);
 
         // ----- idle behaviour -----
-        function glanceAround(arriving) {
+        // He only ever glances left; the right-facing pose read badly
+        // against the edge of the screen.
+        function glanceAround() {
             if (glancing || !atRest()) return;
             glancing = true;
 
-            const first = arriving ? LEFT : (Math.random() < 0.5 ? LEFT : RIGHT);
-            const other = first === LEFT ? RIGHT : LEFT;
-            const twice = arriving || Math.random() < 0.6;
-
-            setTimeout(function () { if (atRest()) body.src = first; }, 260);
-            setTimeout(function () { if (atRest()) body.src = OPEN;  }, 1200);
-
-            if (twice) {
-                setTimeout(function () { if (atRest()) body.src = other; }, 1500);
-                setTimeout(function () { if (atRest()) body.src = OPEN;  }, 2450);
-            }
-            setTimeout(function () { glancing = false; }, twice ? 2600 : 1350);
+            setTimeout(function () { if (atRest()) body.src = LEFT; }, 260);
+            setTimeout(function () { if (atRest()) body.src = OPEN; }, 1250);
+            setTimeout(function () { glancing = false; }, 1400);
         }
 
         function scheduleGlance() {
             setTimeout(function () {
-                if (!running && atRest()) glanceAround(false);
+                if (!running && atRest()) glanceAround();
                 scheduleGlance();
             }, 11000 + Math.random() * 9000);
         }
