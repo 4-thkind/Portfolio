@@ -14,6 +14,9 @@
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    /* the navbar is fixed, so anchored sections must stop clear of it
+       instead of sliding underneath */
+    scroll-padding-top: calc(var(--nav-height) + 16px);
 }
 
 body {
@@ -133,8 +136,10 @@ body::before {
         transparent 1px,
         transparent 3px
     );
-    opacity: 0.5;
-    mix-blend-mode: multiply;
+    /* No mix-blend-mode: multiply here. It forces the compositor to
+       re-blend the whole viewport every frame and pinned scrolling at
+       20fps. Plain alpha over a dark ground looks the same and is free. */
+    opacity: 0.55;
 }
 
 body::after {
@@ -883,6 +888,18 @@ body::after {
     padding: 24px;
     background: var(--hud-deep);
     border: 3px dashed var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s steps(2), background 0.15s steps(2), transform 0.12s steps(2);
+}
+
+.research-draft-card:hover {
+    border-color: var(--hud-orange);
+    background: var(--hud-screen);
+    transform: translate(-3px, -3px);
+}
+
+.research-draft-card:hover .research-draft-text {
+    color: var(--hud-orange);
 }
 
 .research-draft-text {
