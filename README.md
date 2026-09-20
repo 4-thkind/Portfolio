@@ -3,7 +3,7 @@
 # UTKARSH SINGH
 **Researcher · Developer · Builder**
 
-<img src="assets/readmepic.jpg" width="800" alt="Utkarsh Singh" style="border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
+<img src="assets/readmepic.jpg" width="420" alt="Utkarsh Singh" style="border-radius: 8px; margin-top: 15px; margin-bottom: 25px;">
 
 > *Finding my way out,*
 > *by fucking around*
