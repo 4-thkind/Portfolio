@@ -175,10 +175,10 @@
                     </p>
                     <a href="assets/RESEARCH PAPER(CMEGS).pdf" target="_blank" class="hud-btn hud-btn--orange">Read Paper &rarr;</a>
                 </div>
-                <div class="research-draft-card">
+                <a href="https://openreview.net/profile?id=%7EUtkarsh_Singh3" target="_blank" rel="noopener" class="research-draft-card" aria-label="View my OpenReview profile">
                     <span class="radar" aria-hidden="true"></span>
                     <span class="research-draft-text">drafting more...</span>
-                </div>
+                </a>
             </div>
         </div>
     </section>
@@ -191,53 +191,53 @@
 
                 <div class="project-card hud-panel">
                     <div class="project-top">
-                        <span class="project-label">Fullstack &middot; ML</span>
-                        <h3 class="project-name"><a href="https://github.com/4-thkind/Movie-Recommendation-Model-ATLASS-" target="_blank" rel="noopener">ATLASS</a></h3>
+                        <span class="project-label">Risk ML &middot; Fintech &middot; India</span>
+                        <h3 class="project-name"><a href="https://github.com/4-thkind/KAVACH" target="_blank" rel="noopener">KAVACH</a></h3>
                     </div>
                     <p class="project-desc">
-                        Adaptive Taste Learning And Suggestion System — a full-stack recommendation engine that uses collaborative filtering (NMF/SVD on MovieLens) to suggest movies and series tailored to individual taste, with a modular frontend architecture separating data pipelines, model integration, and UI.
+                        A defence-only risk manager for Indian D2C merchants, who lose 5 to 15% of gross margin to COD return abuse, coordinated rings and chargebacks. Abuse is invisible per-order, so KAVACH pairs a calibrated XGBoost return-risk scorer with NetworkX graph detection over shared phones, devices, VPAs and fuzzy-matched addresses. That catches structure a per-row model cannot see. Ring detection scored 0.889 precision at 1.000 recall on held-out data. Every decision ships with exact SHAP attributions and a SHA-256 hash-chained audit trail.
                     </p>
                     <div class="project-stack">
-                        <code>React</code><code>Python</code><code>NMF/SVD</code><code>scikit-learn</code>
+                        <code>Python</code><code>FastAPI</code><code>XGBoost</code><code>SHAP</code><code>NetworkX</code><code>Next.js</code>
                     </div>
                 </div>
 
-            <div class="project-card hud-panel">
+                <div class="project-card hud-panel">
+                    <div class="project-top">
+                        <span class="project-label">Agentic AI &middot; Privacy &middot; India</span>
+                        <h3 class="project-name"><a href="https://github.com/4-thkind/Netra-AI" target="_blank" rel="noopener">NETR&#256;</a></h3>
+                    </div>
+                    <p class="project-desc">
+                        An AI growth copilot for Indian Kirana stores, 90% of a $600B+ grocery market running blind on demand. The hard part is that naive market intelligence enables competitor surveillance and price collusion. So NETR&#256; enforces a five-layer privacy boundary: k-anonymity cohort gating (N&nbsp;&ge;&nbsp;10) with adaptive radius expansion, Laplace differential privacy, and an anti-reconstruction interceptor that blocks differencing attacks. Demand forecasting, non-collusive price benchmarking and credit scoring reach merchants over Soundbox audio, WhatsApp and web in 7 Indic languages.
+                    </p>
+                    <div class="project-stack">
+                        <code>Python</code><code>FastAPI</code><code>Llama 3.3 70B</code><code>Sarvam AI</code><code>React</code><code>Differential Privacy</code>
+                    </div>
+                </div>
+
+                <div class="project-card hud-panel">
+                    <div class="project-top">
+                        <span class="project-label">Hybrid ML &middot; In-Browser</span>
+                        <h3 class="project-name"><a href="https://github.com/4-thkind/Movie-Recommendation-Model-ATLASS-" target="_blank" rel="noopener">ATLASS</a></h3>
+                    </div>
+                    <p class="project-desc">
+                        A hybrid recommender that runs entirely in the browser, with no inference server and no round-trip latency. Rating a film projects it into a 32-dimensional taste vector by SVD fold-in, blended 70/30 with a 48-dimensional LSA content profile so recommendations stay coherent when rating data is sparse. Pre-trained weight matrices ship as ~700KB of JSON and re-score the entire feed in under 50ms. Built on MovieLens (9,742 films, 100,836 ratings) and fronted by a WebGL gallery rendering cards along a parametric arc.
+                    </p>
+                    <div class="project-stack">
+                        <code>JavaScript</code><code>SVD</code><code>LSA/TF-IDF</code><code>WebGL</code><code>GSAP</code><code>TMDb API</code>
+                    </div>
+                </div>
+
+                <div class="project-card hud-panel">
                     <div class="project-top">
                         <span class="project-label">AI Shopping Agent &middot; E-commerce</span>
                         <h3 class="project-name"><a href="https://github.com/4-thkind/SCOUT" target="_blank" rel="noopener">SCOUT</a></h3>
                     </div>
                     <p class="project-desc">
-                        An AI-powered cross-platform shopping assistant for India that searches Amazon, Flipkart, Blinkit, Zepto, Instamart, Myntra and Ajio simultaneously, ranks results through a six-factor scoring engine, and streams AI-generated recommendations in real time via SSE.
+                        Shopping across Indian platforms means a dozen tabs and no real answer on price or delivery. SCOUT collapses that into one conversational query, searching Amazon, Flipkart, Blinkit, Zepto, Instamart, Myntra and Ajio in parallel. Claude routes intent and pulls typed constraints like budget, brand, features and pincode out of natural Hindi or Hinglish, including slang and typos. Results are de-duplicated by title fingerprint, then ranked on a transparent six-factor score across price fit, ratings, review volume, delivery speed, platform trust and feature match, with pros and cons streamed token-by-token over SSE.
                     </p>
                     <div class="project-stack">
-                        <code>Python</code><code>FastAPI</code><code>Claude API</code><code>SSE</code><code>Redis</code>
-                    </div>
-                </div>    
-
-                <div class="project-card hud-panel">
-                    <div class="project-top">
-                        <span class="project-label">ML &middot; Automotive &middot; India</span>
-                        <h3 class="project-name"><a href="https://github.com/4-thkind/TRACTION" target="_blank" rel="noopener">TRACTION</a></h3>
-                    </div>
-                    <p class="project-desc">
-                        Telemetry-based Real-time Automotive Intelligence Platform — an ML-powered vehicle co-pilot for Indian mid-range cars, translating raw sensor data across 47 fields into plain-language advisories. Built on a synthetic dataset of 10,800 readings across 180 Indian driving sessions, accounting for Delhi/NCR traffic patterns and fuel adulteration scenarios.
-                    </p>
-                    <div class="project-stack">
-                        <code>Python</code><code>ML</code><code>Streamlit</code><code>Pandas</code>
-                    </div>
-                </div>
-
-                <div class="project-card hud-panel">
-                    <div class="project-top">
-                        <span class="project-label">Fullstack &middot; Health &middot; GenAI</span>
-                        <h3 class="project-name"><a href="https://github.com/4-thkind/Careflow" target="_blank" rel="noopener">CareFlow</a></h3>
-                    </div>
-                    <p class="project-desc">
-                        A full-stack personal health dashboard covering nutrition, hydration, medication reminders, BMI tracking, and real-time geospatial mapping of nearby medical facilities via Leaflet. Gemini AI powers an intelligent health assistant for personalised queries. Built with Framer Motion and GSAP micro-interactions.
-                    </p>
-                    <div class="project-stack">
-                        <code>Express.js</code><code>Gemini AI</code><code>Leaflet</code><code>GSAP</code><code>Framer Motion</code>
+                        <code>Python</code><code>FastAPI</code><code>Claude API</code><code>SSE</code><code>Redis</code><code>SerpAPI</code>
                     </div>
                 </div>
 
@@ -326,35 +326,36 @@
             <h2 class="section-title">Achievements</h2>
 
             <div class="achievements-list">
-                
+
                 <div class="achievement hud-panel">
-    
+                    <div class="achievement-meta">2026 &nbsp;&middot;&nbsp; National Hackathon</div>
+                    <div class="achievement-body">
+                        <h3 class="achievement-title">Top 10 Finalist &mdash; Paytm Build for India AI Hackathon</h3>
+                        <p class="achievement-desc">Finished in the Top 10 nationally at the Paytm Build for India AI Hackathon, building NETR&#256; &mdash; an AI growth copilot for Indian Kirana merchants that delivers market intelligence under a five-layer privacy boundary, using k-anonymity cohort gating and differential privacy to make competitor surveillance mathematically impossible.</p>
+                    </div>
+                </div>
+
+                <div class="achievement hud-panel">
                     <div class="achievement-meta">ICML 2026 &nbsp;&middot;&nbsp; Published Researcher</div>
                     <div class="achievement-body">
                         <h3 class="achievement-title">Published at International Conference on Machine Learning</h3>
-                        <p class="achievement-desc">Co-authored a paper accepted at ICML 2026 — one of the most selective ML venues globally at ~26% acceptance rate. Published as a first-year undergraduate.</p>
+                        <p class="achievement-desc">Co-authored a paper accepted at ICML 2026 &mdash; one of the most selective ML venues globally at ~26% acceptance rate. Published as a first-year undergraduate.</p>
                     </div>
                 </div>
+
                 <div class="achievement hud-panel">
-    <div class="achievement-meta">November 2025 &nbsp;&middot;&nbsp; National Honour</div>
-    <div class="achievement-body">
-        <h3 class="achievement-title">Award of Excellence</h3>
-        <p class="achievement-desc">Honored with the Academic Excellence Award, presented by Shri Suresh Jain(National Organization Secretary, Bharat Vikas Parishad) and Shri Vijay Kumar(Joint Commissioner of Police).</p>
-    </div>
-</div>
-<div class="achievement hud-panel">
+                    <div class="achievement-meta">November 2025 &nbsp;&middot;&nbsp; National Honour</div>
+                    <div class="achievement-body">
+                        <h3 class="achievement-title">Award of Excellence</h3>
+                        <p class="achievement-desc">Honored with the Academic Excellence Award, presented by Shri Suresh Jain(National Organization Secretary, Bharat Vikas Parishad) and Shri Vijay Kumar(Joint Commissioner of Police).</p>
+                    </div>
+                </div>
+
+                <div class="achievement hud-panel">
                     <div class="achievement-meta">May 2026 &nbsp;&middot;&nbsp; National Hackathon</div>
                     <div class="achievement-body">
-                        <h3 class="achievement-title">Recognised as Top Performing Candidate — ET Gen AI Hackathon</h3>
-                        <p class="achievement-desc">Co-built an Autonomous Multi-Agent AI Code Intelligence & Remediation Platform. Ranked Top Performing candidate out of 3,000+ participants nationwide at one of India's largest GenAI hackathons.</p>
-                    </div>
-                </div>
-                <div class="achievement hud-panel">
-    
-                    <div class="achievement-meta">April 2026 &nbsp;&middot;&nbsp; Open Source</div>
-                    <div class="achievement-body">
-                        <h3 class="achievement-title">Open Source Contributor — GSSoC & SSoC</h3>
-                        <p class="achievement-desc">Selected as a contributor for GirlScript Summer of Code and Social Summer of Code, contributing to community-driven software projects.</p>
+                        <h3 class="achievement-title">Recognised as Top Performing Candidate &mdash; ET Gen AI Hackathon</h3>
+                        <p class="achievement-desc">Co-built an Autonomous Multi-Agent AI Code Intelligence &amp; Remediation Platform. Ranked Top Performing candidate out of 3,000+ participants nationwide at one of India's largest GenAI hackathons.</p>
                     </div>
                 </div>
 
