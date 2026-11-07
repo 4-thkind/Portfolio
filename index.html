@@ -220,6 +220,27 @@
 
                 <div class="project-card hud-panel">
                     <div class="project-top">
+                        <span class="project-label">Serverless PWA &middot; On-Device ML &middot; Delhi</span>
+                        <h3 class="project-name"><a href="https://github.com/4-thkind/DelhiJalNav" target="_blank"
+                                rel="noopener">DelhiJalNav</a></h3>
+                    </div>
+                    <p class="project-desc">
+                        A flood-aware route planner that steers Delhi commuters around waterlogged underpasses.
+                        Candidate
+                        routes are checked against crowd-reported hotspots, where each report moves through a reported,
+                        corroborated, conflicted and stale evidence policy, so only a reviewed clear can unblock a
+                        route.
+                        YOLOv8n pothole detection and SegFormer water segmentation run on-device in the browser via ONNX
+                        Runtime Web, with an offline-safe IndexedDB outbox. AWS Bedrock drafts incident reports from
+                        Hindi, English or Hinglish text. 58/58 backend tests and 12/12 live smoke tests pass.
+                    </p>
+                    <div class="project-stack">
+                        <code>TypeScript</code><code>Python</code><code>AWS Lambda</code><code>DynamoDB</code><code>Bedrock</code><code>ONNX Runtime Web</code>
+                    </div>
+                </div>
+
+                <div class="project-card hud-panel project-card-wide">
+                    <div class="project-top">
                         <span class="project-label">Agentic AI &middot; Privacy &middot; India</span>
                         <h3 class="project-name"><a href="https://github.com/4-thkind/Netra-AI" target="_blank"
                                 rel="noopener">NETR&#256;</a></h3>
@@ -235,46 +256,6 @@
                     </p>
                     <div class="project-stack">
                         <code>Python</code><code>FastAPI</code><code>Llama 3.3 70B</code><code>Sarvam AI</code><code>React</code><code>Differential Privacy</code>
-                    </div>
-                </div>
-
-                <div class="project-card hud-panel">
-                    <div class="project-top">
-                        <span class="project-label">Hybrid ML &middot; In-Browser</span>
-                        <h3 class="project-name"><a
-                                href="https://github.com/4-thkind/Movie-Recommendation-Model-ATLASS-" target="_blank"
-                                rel="noopener">ATLASS</a></h3>
-                    </div>
-                    <p class="project-desc">
-                        A hybrid recommender that runs entirely in the browser, with no inference server and no
-                        round-trip latency. Rating a film projects it into a 32-dimensional taste vector by SVD fold-in,
-                        blended 70/30 with a 48-dimensional LSA content profile so recommendations stay coherent when
-                        rating data is sparse. Pre-trained weight matrices ship as ~700KB of JSON and re-score the
-                        entire feed in under 50ms. Built on MovieLens (9,742 films, 100,836 ratings) and fronted by a
-                        WebGL gallery rendering cards along a parametric arc.
-                    </p>
-                    <div class="project-stack">
-                        <code>JavaScript</code><code>SVD</code><code>LSA/TF-IDF</code><code>WebGL</code><code>GSAP</code><code>TMDb API</code>
-                    </div>
-                </div>
-
-                <div class="project-card hud-panel">
-                    <div class="project-top">
-                        <span class="project-label">AI Shopping Agent &middot; E-commerce</span>
-                        <h3 class="project-name"><a href="https://github.com/4-thkind/SCOUT" target="_blank"
-                                rel="noopener">SCOUT</a></h3>
-                    </div>
-                    <p class="project-desc">
-                        Shopping across Indian platforms means a dozen tabs and no real answer on price or delivery.
-                        SCOUT collapses that into one conversational query, searching Amazon, Flipkart, Blinkit, Zepto,
-                        Instamart, Myntra and Ajio in parallel. Claude routes intent and pulls typed constraints like
-                        budget, brand, features and pincode out of natural Hindi or Hinglish, including slang and typos.
-                        Results are de-duplicated by title fingerprint, then ranked on a transparent six-factor score
-                        across price fit, ratings, review volume, delivery speed, platform trust and feature match, with
-                        pros and cons streamed token-by-token over SSE.
-                    </p>
-                    <div class="project-stack">
-                        <code>Python</code><code>FastAPI</code><code>Claude API</code><code>SSE</code><code>Redis</code><code>SerpAPI</code>
                     </div>
                 </div>
 
@@ -365,24 +346,24 @@
             <div class="achievements-list">
 
                 <div class="achievement hud-panel">
-                    <div class="achievement-meta">2026 &nbsp;&middot;&nbsp; National Hackathon</div>
-                    <div class="achievement-body">
-                        <h3 class="achievement-title">Top 10 Finalist &mdash; Paytm Build for India AI Hackathon</h3>
-                        <p class="achievement-desc">Finished in the Top 10 nationally at the Paytm Build for India AI
-                            Hackathon, building NETR&#256; &mdash; an AI growth copilot for Indian Kirana merchants that
-                            delivers market intelligence under a five-layer privacy boundary, using k-anonymity cohort
-                            gating and differential privacy to make competitor surveillance mathematically impossible.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="achievement hud-panel">
                     <div class="achievement-meta">ICML 2026 &nbsp;&middot;&nbsp; Published Researcher</div>
                     <div class="achievement-body">
                         <h3 class="achievement-title">Published at International Conference on Machine Learning</h3>
                         <p class="achievement-desc">Co-authored a paper accepted at ICML 2026; one of the most
                             selective ML venues globally at ~26% acceptance rate. Published as a first-year
                             undergraduate.</p>
+                    </div>
+                </div>
+
+                <div class="achievement hud-panel">
+                    <div class="achievement-meta">2026 &nbsp;&middot;&nbsp; National Hackathon</div>
+                    <div class="achievement-body">
+                        <h3 class="achievement-title">Winner &mdash; Paytm Build for India AI Hackathon</h3>
+                        <p class="achievement-desc">Won the Paytm Build for India AI Hackathon, building NETR&#256;
+                            &mdash; an AI growth copilot for Indian Kirana merchants that delivers market intelligence
+                            under a five-layer privacy boundary, using k-anonymity cohort gating and differential
+                            privacy to make competitor surveillance mathematically impossible.
+                        </p>
                     </div>
                 </div>
 
@@ -396,17 +377,6 @@
                     </div>
                 </div>
 
-                <div class="achievement hud-panel">
-                    <div class="achievement-meta">May 2026 &nbsp;&middot;&nbsp; National Hackathon</div>
-                    <div class="achievement-body">
-                        <h3 class="achievement-title">Recognised as Top Performing Candidate &mdash; ET Gen AI Hackathon
-                        </h3>
-                        <p class="achievement-desc">Co-built an Autonomous Multi-Agent AI Code Intelligence &amp;
-                            Remediation Platform. Ranked Top Performing candidate out of 3,000+ participants nationwide
-                            at one of India's largest GenAI hackathons.</p>
-                    </div>
-                </div>
-
                 <div class="locked-in-wrap">
                     <span class="radar" aria-hidden="true"></span>
                     <span class="locked-in-text">locked in for more</span>
@@ -417,19 +387,19 @@
                 <h3 class="certs-heading">Certifications</h3>
                 <div class="certs-list">
                     <div class="cert">
+                        <span class="cert-issuer">DeepLearning.AI</span>
+                        <span class="cert-name">Machine Learning Specialization</span>
+                        <span class="cert-date">2026</span>
+                    </div>
+                    <div class="cert">
+                        <span class="cert-issuer">Stanford University</span>
+                        <span class="cert-name">Advanced Learning Algorithms</span>
+                        <span class="cert-date">2026</span>
+                    </div>
+                    <div class="cert">
                         <span class="cert-issuer">AWS</span>
                         <span class="cert-name">Fundamentals of Machine Learning and Artificial Intelligence</span>
                         <span class="cert-date">Jan 2026</span>
-                    </div>
-                    <div class="cert">
-                        <span class="cert-issuer">IBM SkillsBuild</span>
-                        <span class="cert-name">Getting Started with Generative AI</span>
-                        <span class="cert-date">Jan 2026</span>
-                    </div>
-                    <div class="cert">
-                        <span class="cert-issuer">Economic Times</span>
-                        <span class="cert-name">Top Performing Candidate — ET GenAI Hackathon</span>
-                        <span class="cert-date">May 2026</span>
                     </div>
                 </div>
                 <div class="certs-more-wrap">
@@ -447,8 +417,9 @@
     <section class="section" id="contact">
         <div class="container contact-wrap">
             <h2 class="section-title">Contact</h2>
-            <p class="contact-intro">Open to research collaborations, internships, and interesting problems. Reach out
-                anytime.</p>
+            <p class="contact-intro">Open to research collaborations, internships, and interesting problems.
+                <br>Reach out anytime.
+            </p>
             <div class="contact-items">
                 <a href="mailto:utkarshsingh72007@gmail.com" class="contact-item hud-panel">
                     <div class="contact-icon contact-icon--mail">

@@ -974,6 +974,18 @@ body::after {
     gap: 22px;
 }
 
+.project-card-wide {
+    grid-column: 1 / -1;
+    max-width: calc(50% - 11px);
+    justify-self: center;
+}
+
+@media (max-width: 760px) {
+    .project-card-wide {
+        max-width: 100%;
+    }
+}
+
 .project-card {
     padding: 26px 24px;
     transition: transform 0.12s steps(2);
